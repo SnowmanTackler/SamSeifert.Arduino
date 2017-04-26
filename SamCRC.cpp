@@ -14,12 +14,12 @@ SamCRC::SamCRC(byte device_id)
 void SamCRC::Attach(HardwareSerial  &print)
 {
   Printer = &print;
-  Printer->begin(57600);  
+  Printer->begin(115200);  
 }
 
 void SamCRC::MinimumVersion(float version)
 {
-  if (version <= 1.2) // Current version is the decimal
+  if (version <= 1.3) // Current version is the decimal
     return;
 
   pinMode(LED_BUILTIN, OUTPUT);
@@ -50,22 +50,23 @@ void SamCRC::pSend(byte b)
   }  
 }
 
-void SamCRC::MessageSend(byte message_id, byte * send_array, byte send_length)
+void SamCRC::BeginSend(byte message_id)
+{
+  SendArray[0] = DeviceID;
+  SendArray[1] = message_id;
+  EasySendIndex = 2;
+}
+
+void SamCRC::FinishSend()
 {
   Printer->write(MESSAGE_START);
   
   byte crc = 0;
 
-  pSend(DeviceID);
-  crc = aCRC(crc, DeviceID);  
-
-  pSend(message_id);
-  crc = aCRC(crc, message_id);
-  
-  for (int i = 0; i < send_length; i++)
+  for (int i = 0; i < EasySendIndex; i++)
   {
-    pSend(send_array[i]);
-    crc = aCRC(crc, send_array[i]);
+    pSend(SendArray[i]);
+    crc = aCRC(crc, SendArray[i]);
   }
   
   pSend(crc);
@@ -87,7 +88,7 @@ byte SamCRC::aCRC(byte crc, byte inbyte)
   return crc;
 }
 
-void SamCRC::CheckMessages(byte * receive_array,  byte recieve_max_length, void (*message_received)(byte, byte))
+void SamCRC::CheckMessages(void (*message_received)(byte, byte)) // byte message_id, byte message_length
 {
   if (Printer->available() > 0)
   {
@@ -95,8 +96,8 @@ void SamCRC::CheckMessages(byte * receive_array,  byte recieve_max_length, void 
 
     if (b != MESSAGE_END)
     {
-      if (ReceiveIndex == recieve_max_length) ReceiveIndex = 0;        
-      receive_array[ReceiveIndex++] = b;          
+      if (ReceiveIndex == SamCRC_MaxLength) ReceiveIndex = 0;        
+      ReceiveArray[ReceiveIndex++] = b;          
       return;      
     }
     
@@ -108,31 +109,31 @@ void SamCRC::CheckMessages(byte * receive_array,  byte recieve_max_length, void 
       
       while (start < lens)
       {
-          if (receive_array[start] == MESSAGE_START) break;
+          if (ReceiveArray[start] == MESSAGE_START) break;
           else start++;
       }
       
       if (lens - 1 == start) return; // Start then End
 
       for (byte i = start + 1; i < lens; i++)
-          if (receive_array[i] == MESSAGE_START)
+          if (ReceiveArray[i] == MESSAGE_START)
               return; // Multiple Message Starts               
 
       lens -= start + 1;
 
       for (byte i = 0; i < lens; i++)
-        receive_array[i] = receive_array[start + 1 + i];      
+        ReceiveArray[i] = ReceiveArray[start + 1 + i];      
     }
     { // Unescape
       byte new_dex = 0;
       for (byte i = 0; i < lens; i++)
       {
-          if (MESSAGE_ESCAPE == receive_array[i])
+          if (MESSAGE_ESCAPE == ReceiveArray[i])
           {
               if (i == lens - 1) return ; // Escape Char Ends Sequence
-              else receive_array[new_dex++] = receive_array[++i] ^ MESSAGE_ESCAPE_MASK;
+              else ReceiveArray[new_dex++] = ReceiveArray[++i] ^ MESSAGE_ESCAPE_MASK;
           }
-          else receive_array[new_dex++] = receive_array[i];
+          else ReceiveArray[new_dex++] = ReceiveArray[i];
       }
       lens = new_dex;       
     }
@@ -140,17 +141,16 @@ void SamCRC::CheckMessages(byte * receive_array,  byte recieve_max_length, void 
       byte crc = 0;
       
       for (byte i = 0; i < lens - 1; i++)
-        crc = aCRC(crc, receive_array[i]);
+        crc = aCRC(crc, ReceiveArray[i]);
 
-      if (crc != receive_array[lens - 1]) return; // Invalid CRC
+      if (crc != ReceiveArray[lens - 1]) return; // Invalid CRC
 
       lens--; // No CRC
 
-      byte message_id = receive_array[0];
+      byte message_id = ReceiveArray[0];
 
       // Shift receive away one to left
-      for (byte i = 1; i < lens; i++)
-        receive_array[i - 1] = receive_array[i];          
+      EasyReceiveIndex = 1; // Start one to the right!   
 
       message_received(message_id, lens - 1);
     }
@@ -160,13 +160,66 @@ void SamCRC::CheckMessages(byte * receive_array,  byte recieve_max_length, void 
 
 
 
+void SamCRC::SendFloat(float f)
+{
+  union {  // Create union of shared memory space
+    float variable;
+    byte array[4];
+  } u;
+  // Overite bytes of union with float variable
+  u.variable = f;
+  memcpy(&SendArray[EasySendIndex], u.array, 4);  
+  EasySendIndex += 4;
+}
+
+void SamCRC::SendInt32(int32_t i)
+{
+  union {  // Create union of shared memory space
+    int32_t variable;
+    byte array[4];
+  } u;
+  // Overite bytes of union with float variable
+  u.variable = i;
+  memcpy(&SendArray[EasySendIndex], u.array, 4);  
+  EasySendIndex += 4;  
+}
+
+void SamCRC::SendByte(byte b)
+{
+  SendArray[EasySendIndex] = b;
+  EasySendIndex += 1;
+}
 
 
 
 
 
+float SamCRC::ReadFloat()
+{
+  union {  // Create union of shared memory space
+    float variable;
+    byte array[4];
+  } u;
+  // Overite bytes of union with float variable
+  memcpy(u.array, &ReceiveArray[EasyReceiveIndex], 4);  
+  EasyReceiveIndex += 4;
+  return u.variable;
+}
 
+int32_t SamCRC::ReadInt32()
+{
+  union {  // Create union of shared memory space
+    int32_t variable;
+    byte array[4];
+  } u;
+  // Overite bytes of union with float variable
+  memcpy(u.array, &ReceiveArray[EasyReceiveIndex], 4);  
+  EasyReceiveIndex += 4;  
+  return u.variable;
+}
 
-
-
-
+byte SamCRC::ReadByte()
+{
+  EasyReceiveIndex += 1;
+  return ReceiveArray[EasySendIndex - 1];
+}
