@@ -221,5 +221,5 @@ int32_t SamCRC::ReadInt32()
 byte SamCRC::ReadByte()
 {
   EasyReceiveIndex += 1;
-  return ReceiveArray[EasySendIndex - 1];
+  return ReceiveArray[EasyReceiveIndex - 1];
 }
