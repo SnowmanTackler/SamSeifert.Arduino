@@ -149,10 +149,9 @@ void SamCRC::CheckMessages(void (*message_received)(byte, byte)) // byte message
 
       byte message_id = ReceiveArray[0];
 
-      // Shift receive away one to left
       EasyReceiveIndex = 1; // Start one to the right!   
 
-      message_received(message_id, lens - 1);
+      message_received(message_id, lens - 1); // No message id in length
     }
   }
 }
@@ -221,5 +220,5 @@ int32_t SamCRC::ReadInt32()
 byte SamCRC::ReadByte()
 {
   EasyReceiveIndex += 1;
-  return ReceiveArray[EasySendIndex - 1];
+  return ReceiveArray[EasyReceiveIndex - 1];
 }
