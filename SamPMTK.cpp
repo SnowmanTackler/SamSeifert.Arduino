@@ -124,7 +124,7 @@ void SamPMTK::Attach(HardwareSerial &print)
 
 void SamPMTK::CheckMessages(void (*message_received)(uint8_t)) // byte message_length
 {
-  if (Printer->available())
+  while (Printer->available())
   {
     char c = Printer->read();
 
