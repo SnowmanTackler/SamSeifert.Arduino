@@ -24,8 +24,7 @@ void setup()
 
   pmtk1.SetUpdateRate(200);
   //SendCommand(&SerialGPS, "PMTK605"); // Ask for firmware version
-  pmtk1.Subscribe(1, 0, 0, 0, 0, 0); // Get GLL
-  pmtk1.SubscribeAntenna(false);
+  pmtk1.Subscribe(1, 0, 0, 0, 0, 0, false); // Get GLL
  
   Serial.println("Starting!");
 }
