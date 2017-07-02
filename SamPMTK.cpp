@@ -41,7 +41,8 @@ void SamPMTK::Subscribe(uint8_t NMEA_SEN_GLL, // GPGLL interval - Geographic Pos
                uint8_t NMEA_SEN_VTG, // GPVTG interval - Course over Ground and Ground Speed
                uint8_t NMEA_SEN_GGA, // GPGGA interval - GPS Fix Data
                uint8_t NMEA_SEN_GSA, // GPGSA interval - GNSS DOPS and Active Satellites
-               uint8_t NMEA_SEN_GSV) // GPGSV interval - GNSS Satellites in View
+               uint8_t NMEA_SEN_GSV, // GPGSV interval - GNSS Satellites in View
+               bool antenna)
 { /*
     All Inputs:
     0 - Disabled or not supported sentence
@@ -63,7 +64,11 @@ void SamPMTK::Subscribe(uint8_t NMEA_SEN_GLL, // GPGLL interval - Geographic Pos
           max(0, min(5, NMEA_SEN_GGA)),
           max(0, min(5, NMEA_SEN_GSA)),
           max(0, min(5, NMEA_SEN_GSV)) );
+
   SendCommand(buff);
+
+  if (antenna) SendCommand("PGCMD,33,1");
+  else         SendCommand("PGCMD,33,0");
 }
 
 // Supported Baud Rates: 4800,9600,14400,19200,38400,57600,115200
@@ -74,13 +79,6 @@ void SamPMTK::SetBaudRate(int rate)
   char buff[15];
   sprintf(buff, "PMTK251,%i", rate);
   SendCommand(buff);
-}
-
-// Set Antenna
-void SamPMTK::SubscribeAntenna(bool antenna)
-{
-  if (antenna) SendCommand("PGCMD,33,1");
-  else         SendCommand("PGCMD,33,0");
 }
 
 char * SamPMTK::RecieveString()
