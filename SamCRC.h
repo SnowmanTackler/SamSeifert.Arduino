@@ -1,12 +1,11 @@
 #ifndef SamCRC_h
 #define SamCRC_h
 
-#include "Arduino.h"
-
 #ifndef SamCRC_MaxLength
 #define SamCRC_MaxLength 128
 #endif
 
+#include "Arduino.h"
 
 class SamCRC
 {

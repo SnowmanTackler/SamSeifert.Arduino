@@ -90,7 +90,7 @@ byte SamCRC::aCRC(byte crc, byte inbyte)
 
 void SamCRC::CheckMessages(void (*message_received)(byte, byte)) // byte message_id, byte message_length
 {
-  if (Printer->available() > 0)
+  while (Printer->available() > 0)
   {
     byte b = Printer->read();  
 
