@@ -111,8 +111,7 @@ void SamPMTK::Attach(HardwareSerial &print)
 
     delay(100);
 
-    Subscribe(0, 0, 0, 0, 0, 0); // Unsubscribe from everything
-    SubscribeAntenna(false); // Unsubscribe from antenna too!
+    Subscribe(0, 0, 0, 0, 0, 0, false); // Unsubscribe from everything
     SetBaudRate(final_baud);
     Printer->flush();
 
