@@ -95,8 +95,9 @@ void SamPMTK::Attach(HardwareSerial &print)
 {
   Printer = &print;
 
+  const int delay_millis = 20;
   const int num_bauds = 7;
-  int bauds[num_bauds] = {4800, 9600, 14400, 19200, 38400, 57600, 115200 };
+  int bauds[num_bauds] = { 4800, 9600, 14400, 19200, 38400, 57600, 115200 };
   int final_baud = bauds[num_bauds - 1];
 
   for (int i = 0; i < num_bauds; i++)
@@ -104,18 +105,18 @@ void SamPMTK::Attach(HardwareSerial &print)
     if (i != 0)
     {
       Printer->end();
-      delay(100);
+      delay(delay_millis);
     }
 
     Printer->begin(bauds[i]);
 
-    delay(100);
+    delay(delay_millis);
 
     Subscribe(0, 0, 0, 0, 0, 0, false); // Unsubscribe from everything
     SetBaudRate(final_baud);
     Printer->flush();
 
-    delay(100);
+    delay(delay_millis);
   }
 }
 
