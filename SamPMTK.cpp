@@ -95,12 +95,12 @@ void SamPMTK::Attach(HardwareSerial &print)
 {
   Printer = &print;
 
-  const int delay_millis = 20;
-  const int num_bauds = 7;
-  int bauds[num_bauds] = { 4800, 9600, 14400, 19200, 38400, 57600, 115200 };
-  int final_baud = bauds[num_bauds - 1];
+  const uint8_t delay_millis = 20;
+  const uint8_t num_bauds = 7;
+  int32_t bauds[num_bauds] = { 4800, 9600, 14400, 19200, 38400, 57600, 115200 };
+  uint8_t final_baud = bauds[num_bauds - 1];
 
-  for (int i = 0; i < num_bauds; i++)
+  for (uint8_t i = 0; i < num_bauds; i++)
   {
     if (i != 0)
     {
