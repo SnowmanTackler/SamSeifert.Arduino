@@ -4,22 +4,23 @@
 void SamPMTK::SendCommand(const char *str) {
   Printer->write("$");
   uint8_t checksum = 0;
-  for (int i = 0; str[i] != '\0'; i++)
+  for (uint8_t i = 0; str[i] != '\0'; i++)
   {
     Printer->write(str[i]);
     checksum = checksum ^ str[i];
   }
   char buff[2];
-  sprintf(buff, "%02X", checksum);
   Printer->write("*");
-  Printer->write(buff[0]);
-  Printer->write(buff[1]);
+  Printer->print(checksum, HEX);  
+//  sprintf(buff, "%02X", checksum); // ONLY WORKS ON ARDUINO DUE.  Doesn't work on mega for some reason
+//  Printer->write(buff[0]);
+//  Printer->write(buff[1]);
   Printer->write('\r');
   Printer->write('\n');
 }
 
 // Valid ranges for milli are 200 - 10000
-void SamPMTK::SetUpdateRate(int milli)
+void SamPMTK::SetUpdateRate(uint32_t milli)
 {
   milli = max(200, min(10000, milli));
 
@@ -56,7 +57,6 @@ void SamPMTK::Subscribe(uint8_t NMEA_SEN_GLL, // GPGLL interval - Geographic Pos
   // PMTK314,1,1,1,1,1,5,0,0,0,0,0,0,0,0,0,0,0,0,0
   // 45 real chars, one end char
   char buff[46];
-
   sprintf(buff, "PMTK314,%i,%i,%i,%i,%i,%i,0,0,0,0,0,0,0,0,0,0,0,0,0",
           max(0, min(5, NMEA_SEN_GLL)),
           max(0, min(5, NMEA_SEN_RMC)),
@@ -72,7 +72,7 @@ void SamPMTK::Subscribe(uint8_t NMEA_SEN_GLL, // GPGLL interval - Geographic Pos
 }
 
 // Supported Baud Rates: 4800,9600,14400,19200,38400,57600,115200
-void SamPMTK::SetBaudRate(int rate)
+void SamPMTK::SetBaudRate(uint32_t rate)
 {
   // PMTK251,115200
   // 14 real chars, one end char
@@ -96,9 +96,28 @@ void SamPMTK::Attach(HardwareSerial &print)
   Printer = &print;
 
   const uint8_t delay_millis = 20;
-  const uint8_t num_bauds = 7;
-  int32_t bauds[num_bauds] = { 4800, 9600, 14400, 19200, 38400, 57600, 115200 };
-  uint8_t final_baud = bauds[num_bauds - 1];
+
+  #if defined(__arm__) 
+    // Arduino Due Board follows
+    const uint8_t num_bauds = 7;
+  #elif defined(__AVR__) 
+    // Other AVR based Boards follows
+    const uint8_t num_bauds = 4;
+  #else
+    #error Architecture or board not supported.
+  #endif
+
+  uint32_t bauds[7] = {
+      4800, 
+      9600, 
+     14400, 
+     19200, 
+     38400, 
+     57600, 
+    115200
+  };
+
+  uint32_t final_baud = bauds[num_bauds - 1];
 
   for (uint8_t i = 0; i < num_bauds; i++)
   {
@@ -141,7 +160,7 @@ void SamPMTK::CheckMessages(void (*message_received)(uint8_t)) // byte message_l
             ReceiveIndex -= 3;
 
             uint8_t checksum = 0;
-            for (int i = 0; i < ReceiveIndex; i++)
+            for (uint8_t i = 0; i < ReceiveIndex; i++)
               checksum = checksum ^ ReceiveArray[i];
             char buff[2];
             sprintf(buff, "%02X", checksum);

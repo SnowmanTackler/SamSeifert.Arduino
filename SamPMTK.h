@@ -18,8 +18,8 @@ class SamPMTK
 		char * RecieveString();
 
 		void SendCommand(const char *str);
-		void SetBaudRate(int rate); // Supported Baud Rates: 4800,9600,14400,19200,38400,57600,115200
-		void SetUpdateRate(int milli); // Valid ranges for milli are 200 - 10000
+		void SetBaudRate(uint32_t rate); // Supported Baud Rates: 4800,9600,14400,19200,38400,57600,115200
+		void SetUpdateRate(uint32_t milli); // Valid ranges for milli are 200 - 10000
 		void Subscribe(
 			uint8_t NMEA_SEN_GLL,  // GPGLL interval - Geographic Position - Latitude longitude
             uint8_t NMEA_SEN_RMC,  // GPRMC interval - Recommended Minimum Specific GNSS Sentence
