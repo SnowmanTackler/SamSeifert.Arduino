@@ -6,9 +6,9 @@ SamRunningAVG::SamRunningAVG(double alpha)
   Alpha = alpha;
 }
 
-double SamRunningAVG::Update(unsigned long time, double value)
+double SamRunningAVG::Update(uint32_t time, double value)
 {
-  unsigned long delta = 0;
+  uint32_t delta = 0;
 
   if (time < last_time) // Rollover of millis()
   {

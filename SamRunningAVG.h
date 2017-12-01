@@ -8,9 +8,9 @@ class SamRunningAVG
   public:
     SamRunningAVG(double alpha = 0);
 
-    double Update(unsigned long time, double value);
+    double Update(uint32_t time, double value);
   private:
-    unsigned long last_time = ULONG_MAX;    
+    uint32_t last_time = ULONG_MAX;    
     double Alpha; // Set on initialization
 
   protected:
