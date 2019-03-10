@@ -37,7 +37,8 @@ void SamPMTK::SetUpdateRate(uint32_t milli)
   SendCommand(buff);
 }
 
-void SamPMTK::Subscribe(uint8_t NMEA_SEN_GLL, // GPGLL interval - Geographic Position - Latitude longitude
+void SamPMTK::Subscribe(
+               uint8_t NMEA_SEN_GLL, // GPGLL interval - Geographic Position - Latitude longitude
                uint8_t NMEA_SEN_RMC, // GPRMC interval - Recommended Minimum Specific GNSS Sentence
                uint8_t NMEA_SEN_VTG, // GPVTG interval - Course over Ground and Ground Speed
                uint8_t NMEA_SEN_GGA, // GPGGA interval - GPS Fix Data
