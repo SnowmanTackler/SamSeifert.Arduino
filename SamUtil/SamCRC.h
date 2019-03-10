@@ -19,10 +19,11 @@ class SamCRC
   	void BeginSend(byte message_id);
     void SendFloat(float f);
     void SendDouble(double f);
-  	void SendInt32(int32_t f);
+    void SendInt32(int32_t f);
+    void SendIntAsString(int32_t f, byte min_decimal_places = 0); // Doesn't add termination char!
     void SendByte(byte b);
-    void SendBytes(byte * b, int32_t lens);
-    void SendString(char * c);
+    void SendBytes(const byte * b, int32_t lens);
+    void SendString(const char * c);
 
     // Send data serially (includes Start, Escape, Checksum, End)
     void FinishSend();    

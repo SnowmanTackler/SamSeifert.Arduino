@@ -1,9 +1,12 @@
 #include "Arduino.h"
 #include "SamRunningAVG.h"
 
+#define uint32_max ((uint32_t)-1)
+
 SamRunningAVG::SamRunningAVG(double alpha)
 {
   Alpha = alpha;
+  last_time = uint32_max;
 }
 
 double SamRunningAVG::Update(uint32_t time, double value)
@@ -12,7 +15,7 @@ double SamRunningAVG::Update(uint32_t time, double value)
 
   if (time < last_time) // Rollover of millis()
   {
-    delta = ULONG_MAX - last_time;
+    delta = uint32_max - last_time;
     delta += 1;
     delta += time;
   }

@@ -10,7 +10,7 @@ class SamRunningAVG
 
     double Update(uint32_t time, double value);
   private:
-    uint32_t last_time = ULONG_MAX;    
+    uint32_t last_time;
     double Alpha; // Set on initialization
 
   protected:
