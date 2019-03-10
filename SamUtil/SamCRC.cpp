@@ -157,25 +157,80 @@ void SamCRC::CheckMessagesP(void (*message_received)(byte, byte)) // byte messag
   EasySendIndex += sizeof(u);                            \
 }
 
-void SamCRC::SendFloat(float f) SendType(float)
-void SamCRC::SendDouble(double f) SendType(double)
-void SamCRC::SendInt32(int32_t f)  SendType(int32_t)
+void SamCRC::SendFloat(float f)   SendType(float);
+void SamCRC::SendDouble(double f) SendType(double);
+void SamCRC::SendInt32(int32_t f) SendType(int32_t);
 void SamCRC::SendByte(byte b)
 {
   SendArray[EasySendIndex] = b;
   EasySendIndex += 1;
 }
-void SamCRC::SendBytes(byte * b, int32_t lens)
+void SamCRC::SendBytes(const byte * b, int32_t lens)
 {
   for (int32_t i = 0; i < lens; i++)
     SendByte(b[i]);
 }
 
-void SamCRC::SendString(char * c)
+void SamCRC::SendString(const char * c)
 {
-  SendBytes((byte *)c, strlen(c));
+  SendBytes((const byte *)c, strlen(c));
 }
 
+void SamCRC::SendIntAsString(int32_t f, byte min_decimal_places)
+{
+  if (f == 0)
+  {
+    for (byte i = 0; i < max(min_decimal_places, 1); i++)
+    {
+      SendByte('0');
+    }
+    return;
+  }
+
+  if (f < 0)
+  {
+    SendByte('-');
+    f *= -1;
+  }
+
+  byte flip_count = 0;
+
+  while (f != 0)
+  {
+    SendByte('0' + (f % 10));
+    flip_count++;
+    f /= 10;
+  }
+
+  for (byte i = 0; i < (flip_count / 2); i++)
+  {
+    byte i1 = (EasySendIndex - i) - 1;
+    byte i2 = (EasySendIndex - flip_count) + i;
+    byte temp = SendArray[i1];
+                SendArray[i1] = SendArray[i2];
+                                SendArray[i2] = temp;
+  }
+
+  if (flip_count >= min_decimal_places) return;
+
+  // Insert leading zeros.
+  min_decimal_places -= flip_count;
+
+  for (byte i = 0; i < flip_count; i++)
+  {
+    byte i1 = (EasySendIndex - i) - 1;
+    SendArray[i1 + min_decimal_places] = SendArray[i1]; // Move forward
+  }
+
+  for (byte i = 0; i < min_decimal_places; i++)
+  {
+    SendArray[EasySendIndex - flip_count + i] = '0'; // Fill Zeros forward
+  }
+
+  EasySendIndex += min_decimal_places;
+
+
+}
 
 
 
