@@ -7,14 +7,14 @@ class SamRunningAVG
 {
   public:
     SamRunningAVG(double alpha = 0);
-
     double Update(uint32_t time, double value);
+    virtual double UpdateElapsed(double old_weight, double value);
+
   private:
     uint32_t last_time;
     double Alpha; // Set on initialization
 
   protected:
-    virtual double UpdateElapsed(double old_weight, double value);
  
     double SumWeights = 0;
     double SumValues = 0;

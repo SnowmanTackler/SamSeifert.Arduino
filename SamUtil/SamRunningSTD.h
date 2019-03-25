@@ -4,14 +4,16 @@
 #include "Arduino.h"
 #include "SamRunningAVG.h"
 
-class SamRunningSTD : public SamRunningAVG 
+class SamRunningSTD : public SamRunningAVG
 {
     public:
         SamRunningSTD(double alpha = 0);
         double AVG();
-    private:
-    protected:
         double UpdateElapsed(double old_weight, double value) override;
+
+    private:
+
+    protected:
         double SumValues2 = 0;
 };
 

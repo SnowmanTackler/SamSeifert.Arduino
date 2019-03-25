@@ -19,7 +19,7 @@ bool SamPoolTime::SendRequest(WiFiUDP * Udp)
 
     if ((rt < _LastRequestTime) || // millis() overflow
         (rt - _LastRequestTime > _MinRequestPeriod))
-    {        
+    {
         _LastRequestTime = rt;
 
         Udp->begin(LOCAL_PORT);
@@ -52,6 +52,11 @@ bool SamPoolTime::SendRequest(WiFiUDP * Udp)
         //Serial.println("5");
         Udp->endPacket();
         //Serial.println("6");
+        return true;
+    }
+    else
+    {
+        return false;
     }
 }
 
@@ -78,7 +83,7 @@ bool SamPoolTime::CatchResponse(WiFiUDP * Udp)
         _LastRecievedUnixTime = secsSince1900 - seventyYears;
         _RecievedUnixTime = true;
         _LastRecievedMillis = millis();
-    }    
+    }
 
     Udp->stop();
 
@@ -91,7 +96,7 @@ uint32_t SamPoolTime::CurrentUnixTime()
 
     if (current_time < _LastRecievedMillis) // millis() rollover
     {
-        _LastRecievedUnixTime += (uint32_max - _LastRecievedMillis) / 1000;        
+        _LastRecievedUnixTime += (uint32_max - _LastRecievedMillis) / 1000;
         _LastRecievedMillis = 0; // Loses maybe 1 second
     }
 
@@ -110,13 +115,13 @@ void SamPoolTime::Fill(struct tm ** time_pointer)
     /*
     // Example 1:
     char date[20];
-    strftime(date, sizeof(date), "%Y-%m-%d", _ClockTime);  
-    Serial.println(date);  
+    strftime(date, sizeof(date), "%Y-%m-%d", _ClockTime);
+    Serial.println(date);
     */
 
     /*
     // Example 1:
-    _Clock.Fill(&_ClockTime); 
+    _Clock.Fill(&_ClockTime);
     Serial.print(1900 + _ClockTime->tm_year);
     Serial.print('-');
     Serial.print(_ClockTime->tm_mon);

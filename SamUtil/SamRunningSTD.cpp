@@ -8,7 +8,7 @@ SamRunningSTD::SamRunningSTD(double alpha) : SamRunningAVG(alpha)
 
 double SamRunningSTD::AVG()
 {
-  return SumValues / SumWeights;    
+  return SumValues / SumWeights;
 }
 
 double SamRunningSTD::UpdateElapsed(double old_weight, double value)
@@ -20,7 +20,7 @@ double SamRunningSTD::UpdateElapsed(double old_weight, double value)
     SumValues2 += value * value;
 
     double variance = SumValues2 / SumWeights - mean * mean;
-    
+
     if (variance < 0) // Double precision sometimes gives us negative variance
         variance = 0;
 
